@@ -20,12 +20,12 @@ const (
 	WILDCARD_FORWARD_DIR PatternToken = "**"
 )
 
-func isContainingWildcard(part string) ([]string, bool) {
+func (self *Pattern) isContainingWildcard(i int) ([]string, bool) {
 
-	wildcardParts := strings.Split(part, "*")
-	numOfWildcards := len(wildcardParts)
+	wildcardParts := strings.Split(self.parts[i], "*")
+	numOfWildcards := strings.Count(self.parts[i], "*")
 
-	if numOfWildcards > 1 && part != string(WILDCARD_FORWARD_DIR) {
+	if numOfWildcards > 1 && self.parts[i] != string(WILDCARD_FORWARD_DIR) {
 		panic("Path pattern my contain ** only in context of ./**/*.go")
 	}
 
@@ -37,17 +37,20 @@ func (self *Pattern) Matches(path string) bool {
 
 	pathParts := strings.Split(path, "/")
 
-	pathIndex := len(pathParts)
-	patternIndex := len(self.parts)
+	pathIndex := len(pathParts) - 1
+	patternIndex := len(self.parts) - 1
 
 	wildcardNextTarget := ""
 
-	for pathIndex > 0 && patternIndex > 0 {
+	for pathIndex >= 0 && patternIndex >= 0 {
 
-		if parts, ok := isContainingWildcard(pathParts[pathIndex]); ok {
-			if !strings.HasPrefix(pathParts[pathIndex], parts[0]) {
+		if parts, ok := self.isContainingWildcard(patternIndex); ok {
+			if !strings.HasPrefix(pathParts[pathIndex], parts[0]) || !strings.HasSuffix(pathParts[pathIndex], parts[1]) {
 				return false
 			}
+			pathIndex--
+			patternIndex--
+			continue
 		}
 
 		if pathParts[pathIndex] == string(WILDCARD_DIR) {

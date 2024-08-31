@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ func TestPatterns(t *testing.T) {
 	for _, testCase := range testCases {
 		pattern, err := NewPattern(testCase.pattern)
 		assert.NoError(t, err)
-		assert.Equal(t, testCase.want, pattern.Matches(testCase.path))
+		assert.Equal(t, testCase.want, pattern.Matches(testCase.path), fmt.Sprintf("For path: \"%s\" and pattern: \"%s\"", testCase.path, testCase.pattern))
 	}
 
 }
