@@ -30,7 +30,6 @@ func (self *Pattern) isContainingWildcard(i int) ([]string, bool) {
 	}
 
 	return wildcardParts, numOfWildcards == 1
-
 }
 
 func (self *Pattern) Matches(path string) bool {
@@ -45,7 +44,9 @@ func (self *Pattern) Matches(path string) bool {
 	for pathIndex >= 0 && patternIndex >= 0 {
 
 		if parts, ok := self.isContainingWildcard(patternIndex); ok {
-			if !strings.HasPrefix(pathParts[pathIndex], parts[0]) || !strings.HasSuffix(pathParts[pathIndex], parts[1]) {
+			hasPrefix := strings.HasPrefix(pathParts[pathIndex], parts[0])
+			hasSuffix := strings.HasSuffix(pathParts[pathIndex], parts[1])
+			if !hasPrefix || !hasSuffix {
 				return false
 			}
 			pathIndex--
@@ -53,18 +54,18 @@ func (self *Pattern) Matches(path string) bool {
 			continue
 		}
 
-		if pathParts[pathIndex] == string(WILDCARD_DIR) {
+		if self.parts[patternIndex] == string(WILDCARD_DIR) {
 			pathIndex--
 			patternIndex--
 			continue
 		}
 
-		if pathParts[pathIndex] == string(WILDCARD_FORWARD_DIR) {
+		if self.parts[patternIndex] == string(WILDCARD_FORWARD_DIR) {
 			pathIndex--
-			if pathIndex == 0 {
+			if pathIndex <= 0 {
 				return false
 			}
-			wildcardNextTarget = self.parts[pathIndex-1]
+			wildcardNextTarget = self.parts[patternIndex-1]
 			continue
 		}
 
